@@ -1,0 +1,24 @@
+
+<%= xtra.do_not_edit_warning template: template %>
+
+# Lab42F
+
+An escript `lab42_f` that uses a very concise but quite logic minilanguage for file manipulation
+
+**N.B.**
+
+This README contains the docstrings and doctests from the code by means of [extractly](https://hex.pm/packages/extractly)
+and the following code examples are therefor verified with `ExUnit` doctests.
+
+<%= xtra.moduledoc "Lab42.F" %>
+
+## Author
+
+Copyright © 2021 Robert Dober
+robert.dober@gmail.com
+
+# LICENSE
+
+Same as Elixir, which is Apache License v2.0. Please refer to [LICENSE](LICENSE) for details.
+
+SPDX-License-Identifier: Apache-2.0

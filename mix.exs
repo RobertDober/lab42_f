@@ -38,6 +38,7 @@ defmodule Lab42F.MixProject do
     [
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.11.2", only: [:test]},
+      {:extractly, "~> 0.2.0", only: [:dev, :test]},
     ]
   end
 

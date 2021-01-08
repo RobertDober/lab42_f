@@ -1,6 +1,7 @@
 *.beam
 /config/*.secret.exs
 .elixir_ls/
+/lab42_f
 # The directory Mix will write compiled artifacts to.
 /_build/
 
