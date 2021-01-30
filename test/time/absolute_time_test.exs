@@ -31,7 +31,7 @@ defmodule Test.Time.AbsoluteTimeTest do
 
   describe "illegal syntax" do
     test "raises an appropriate error" do
-      assert_raise( Lab42.F.Error, "illegal time spec: 2021-02-29", fn ->
+      assert_raise( Lab42.F.Error, "illegal absolute time 2021-02-29", fn ->
         make_time("2021-02-29")
       end)
     end

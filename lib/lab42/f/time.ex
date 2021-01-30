@@ -101,9 +101,10 @@ defmodule Lab42.F.Time do
     _current_date()
   end
   defp _complete_date(date) do
-    (date || "")
+    date
     |> String.split(@date_sep)
     |> Enum.map(&_atoi/1)
+    |> _lpad_with(nil, 3)
     |> zip_with(_current_date(), fn {given, default} -> given || default end)
   end
 
@@ -139,7 +140,7 @@ defmodule Lab42.F.Time do
 
   @spec _make_absolute_time(binary()) :: NaiveDateTime.t
   defp _make_absolute_time(from_string) do
-    time_spec = _compile_iso8601(from_string) |> IO.inspect() 
+    time_spec = _compile_iso8601(from_string)
     case apply(&NaiveDateTime.new/6, time_spec) do
       {:ok, ndt} -> ndt
       _          -> raise Error, "illegal absolute time #{from_string}"
@@ -173,6 +174,12 @@ defmodule Lab42.F.Time do
   @spec now() :: NaiveDateTime.t
   def now do
     @sys_interface.now
+  end
+
+  defp _lpad_with(list, value, size) do
+    Enum.reverse(list) ++ repeat(value, size)
+    |> Enum.take(size)
+    |> Enum.reverse
   end
 
   def repeat(element, times) do

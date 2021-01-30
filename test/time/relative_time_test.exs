@@ -5,7 +5,6 @@ defmodule Test.Time.RelativeTimeTest do
   alias Test.Support.TimeHelper, as: H
 
   describe "now" do
-    @now "2021-01-01 21:39:16Z"
     setup do
       Mock.mock_now(H.ntime(2021, 1, 1, 21, 39, 16))
     end

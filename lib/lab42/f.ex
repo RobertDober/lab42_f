@@ -1,5 +1,6 @@
 defmodule Lab42.F do
   use Lab42.F.Types
+
   usage_info = """
   f [filter_flags] [transformation]
 
@@ -67,8 +68,10 @@ defmodule Lab42.F do
   @doc false
   @spec run(binaries()) :: binaries()
   def run(argv) do
-    parsed = Lab42.F.Parser.parse(argv)
     argv
+    |> Lab42.F.Parser.parse
+    |> Lab42.F.Finder.find
+    |> Enum.map(&Lab42.F.Transformer.transform/1)
   end
   @usage usage_info
   @spec _usage() :: no_return() 
