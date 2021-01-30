@@ -5,6 +5,9 @@ defmodule Lab42.F.Types do
       @type binaries :: list(binary())
 
       @type maybe(t) :: t | nil
+      @type binary? :: maybe(binary())
+
+      @type time_t :: :calendar.datetime()
     end
   end
 end

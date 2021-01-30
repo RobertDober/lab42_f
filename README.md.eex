@@ -12,6 +12,10 @@ and the following code examples are therefor verified with `ExUnit` doctests.
 
 <%= xtra.moduledoc "Lab42.F" %>
 
+## &lt;date time> format
+
+<%= xtra.moduledoc "Lab42.F.Time" %>
+
 ## Author
 
 Copyright © 2021 Robert Dober

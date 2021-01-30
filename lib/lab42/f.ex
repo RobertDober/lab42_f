@@ -10,6 +10,7 @@ defmodule Lab42.F do
   sgt|slt <file size>
   f <rgx>
 
+  <date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
   transformation:
   a string in which %<exp> will be replaced as follows and all spaces will
   be ignored  (like in ~r{...}x)

@@ -1,0 +1,7 @@
+{
+  "skip_files": [
+    "lib/lab42/f.ex",
+    "lib/lab42/f/sys_interface/implementation.ex",
+    "test/"
+  ]
+}

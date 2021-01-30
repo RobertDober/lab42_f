@@ -13,7 +13,6 @@ defmodule Lab42.F.Parser do
   ```
   """
 
-  @typep binary? :: maybe(binary())
   defstruct wildcard: "*",
     type: nil,  # e.g. "vid", "elixir", ...
     mgt: nil, # date modification date greater than
