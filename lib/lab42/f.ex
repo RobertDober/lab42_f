@@ -9,7 +9,7 @@ defmodule Lab42.F do
   t <prefefined type>
   agt|alt|mgt|mlt <date time>
   sgt|slt <file size>
-  f <rgx>
+  rgx <rgx>
 
   <date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
   transformation:

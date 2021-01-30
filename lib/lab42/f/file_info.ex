@@ -17,9 +17,12 @@ defmodule Lab42.F.FileInfo do
     %__MODULE__{name: filename, stat: File.lstat!(filename)}
   end
 
-  @spec naive_time_stamp(t(), atom()) :: NaiveDateTime.t
+  @spec naive_time_stamp(t()|File.Stat.t, atom()) :: NaiveDateTime.t
   def naive_time_stamp(name_info, time_stamp_type \\ :mtime)
   def naive_time_stamp(%__MODULE__{stat: fstat}, time_stamp_type) do
+    naive_time_stamp(fstat, time_stamp_type)
+  end
+  def naive_time_stamp(%File.Stat{}=fstat, time_stamp_type) do
     apply( &NaiveDateTime.new/6,
       fstat
       |> Map.get(time_stamp_type)

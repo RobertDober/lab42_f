@@ -19,7 +19,7 @@ defmodule Lab42.F.Parser do
     mlt: nil, # date modification date less than
     sgt: nil, # size greater than
     slt: nil, # size less than
-    rgx: nil, # additional regex filter
+    rgx: ~r{.}, # additional regex filter
     transform: "%p" # see for details in the README or in Lab42.F.Transform
 
   @type t :: %__MODULE__{
@@ -77,4 +77,3 @@ defmodule Lab42.F.Parser do
     %{result | transform: Enum.join(rest, " ")} |> _check_values!()
   end
 end
-

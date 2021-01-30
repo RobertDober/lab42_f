@@ -20,20 +20,20 @@ defmodule Lab42.F.Time do
   `14-3-1 12` (2014-03-01T12:00:00Z)
   """
 
-  defstruct year: nil, month: nil, day: nil, hour: nil, minute: nil, second: nil, microsecond: {0, 0}, calendar: Calendar.ISO
-  @typep time_rep_t :: list(non_neg_integer())
-  @typep value_t :: maybe(non_neg_integer())
+  # defstruct year: nil, month: nil, day: nil, hour: nil, minute: nil, second: nil, microsecond: {0, 0}, calendar: Calendar.ISO
+  # @typep time_rep_t :: list(non_neg_integer())
+  # @typep value_t :: maybe(non_neg_integer())
 
-  @type t :: %__MODULE__{
-    year: value_t(),
-    month: value_t(),
-    day: value_t(),
-    hour: value_t(),
-    minute: value_t(),
-    second: value_t(),
-    microsecond: {non_neg_integer(), non_neg_integer},
-    calendar: module()
-  }
+  # @type t :: %__MODULE__{
+  #   year: value_t(),
+  #   month: value_t(),
+  #   day: value_t(),
+  #   hour: value_t(),
+  #   minute: value_t(),
+  #   second: value_t(),
+  #   microsecond: {non_neg_integer(), non_neg_integer},
+  #   calendar: module()
+  # }
 
   @sys_interface Application.fetch_env!(:lab42_f, :sys_interface)
 
@@ -55,16 +55,16 @@ defmodule Lab42.F.Time do
   @long_rel_spec ~r{\A (\d+) _ ([[:alpha:]]+) _ ago \z}x
   @short_rel_spec ~r{\A -(\d+)  ([dhms]) s? \z}x
 
-  @spec new(Keyword.t) :: t()
-  def new(opts \\ []) do
-    now = now()
-    struct(__MODULE__)
-    |> Map.from_struct
-    |> Map.keys
-    |> Enum.reduce( struct(__MODULE__), fn field, result -> 
-      %{result|field => Keyword.get(opts, field, Map.get(now, field))}
-    end)
-  end
+  # @spec new(Keyword.t) :: t()
+  # def new(opts \\ []) do
+  #   now = now()
+  #   struct(__MODULE__)
+  #   |> Map.from_struct
+  #   |> Map.keys
+  #   |> Enum.reduce( struct(__MODULE__), fn field, result -> 
+  #     %{result|field => Keyword.get(opts, field, Map.get(now, field))}
+  #   end)
+  # end
 
   @spec make_time(binary()) :: NaiveDateTime.t
   def make_time(from_string)
