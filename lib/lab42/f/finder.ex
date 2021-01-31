@@ -1,7 +1,7 @@
 defmodule Lab42.F.Finder do
   use Lab42.F.Types
 
-  alias Lab42.F.{FileInfo, Parser}
+  alias Lab42.F.{FileInfo, Parser, Time}
 
   @moduledoc false
 
@@ -20,7 +20,7 @@ defmodule Lab42.F.Finder do
   defp filter(file_info, parsed) do
     filter_times(file_info, parsed) &&
       filter_size(file_info, parsed) &&
-        filter_rgx(file_info, parsed
+        filter_rgx(file_info, parsed)
   end
 
   defp filter_rgx(file_info, %{rgx: rgx}) do
@@ -36,7 +36,12 @@ defmodule Lab42.F.Finder do
     true
   end
   defp filter_times(file_info, %Parser{mgt: mgt, mlt: nil}) do
+    this_mtime = Time.naive_date_time_from_file_stat(file_info.stat)
+    this_mtime >= mgt
   end
+
   defp filter_times(file_info, %Parser{mgt: nil, mlt: mlt}) do
+    this_mtime = Time.naive_date_time_from_file_stat(file_info.stat)
+    this_mtime <= mlt
   end
 end

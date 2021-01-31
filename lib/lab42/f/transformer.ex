@@ -11,7 +11,6 @@ defmodule Lab42.F.Transformer do
 
   defp apply_transform(file, compiled_transform) do
     compiled_transform
-    # |> IO.inspect
     |> Enum.map(&apply_transform_to_chunk(file, &1))
     |> Enum.join
   end
@@ -24,13 +23,14 @@ defmodule Lab42.F.Transformer do
   (?: 
     (?<!%) (?:
       %% | %p | %P | %b | %BX | %B  # prefix expressions must always follow their suffixed brethens, to allow them to match first
-      | %d | %D | %x | %X | %rx\d*
+      | %d | %D | %x | %X | %rx\d* | %s
     )
     | [^%]* )
   """x
   @transforms %{
     "b" => &__MODULE__.basename/2,
     "B" => &__MODULE__.basename_wo_last_ext/2,
+    "p" => &__MODULE__.full_relative_path/2,
     "s" => &__MODULE__.verbatim_space/2,
     "%" => &__MODULE__.verbatim_percent/2,
   }
@@ -59,6 +59,10 @@ defmodule Lab42.F.Transformer do
   def basename_wo_last_ext(file, _pattern) do
     Path.basename(file)
     |> String.replace(@last_ext_rgx, "")
+  end
+
+  def full_relative_path(file, _pattern) do
+    file
   end
 
   def verbatim_percent(_file, _pattern) do

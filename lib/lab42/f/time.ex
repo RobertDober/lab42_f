@@ -21,7 +21,7 @@ defmodule Lab42.F.Time do
   """
 
   # defstruct year: nil, month: nil, day: nil, hour: nil, minute: nil, second: nil, microsecond: {0, 0}, calendar: Calendar.ISO
-  # @typep time_rep_t :: list(non_neg_integer())
+  @typep time_rep_t :: list(non_neg_integer())
   # @typep value_t :: maybe(non_neg_integer())
 
   # @type t :: %__MODULE__{
@@ -77,21 +77,32 @@ defmodule Lab42.F.Time do
     end
   end
 
+  def naive_date_time_from_file_stat(fstat) do
+    {{y, mth, d}, {h, min, s}} = fstat.mtime
+    NaiveDateTime.new!(y, mth, d, h, min, s)
+  end
+
   @date_time_sep ~r{ [\sT] }x
   # TODO: Refactor
   @spec _compile_iso8601(binary()) :: time_rep_t()
   defp _compile_iso8601(partial_time) do
     case String.split(partial_time, @date_time_sep) do
-      [date, time] -> 
-        date1 = _complete_date(date)
-        time1 = _complete_time(time)
-        date1 ++ time1
-      [date_or_time] ->
-        {date1, time1} = _determine_date_or_time(date_or_time)
-        date2 = _complete_date(date1)
-        time2 = _complete_time(time1)
-        date2 ++ time2
+      [date, time] -> _compile_iso_date_and_time(date, time)
+      [date_or_time] -> _compile_iso_date_or_time(date_or_time)
     end
+  end
+
+  defp _compile_iso_date_and_time(date, time) do
+    date1 = _complete_date(date)
+    time1 = _complete_time(time)
+    date1 ++ time1
+  end
+
+  defp _compile_iso_date_or_time(date_or_time) do
+    {date1, time1} = _determine_date_or_time(date_or_time)
+    date2 = _complete_date(date1)
+    time2 = _complete_time(time1)
+    date2 ++ time2
   end
 
   @date_sep ~r{ [-/] }x
@@ -140,6 +151,20 @@ defmodule Lab42.F.Time do
 
   @spec _make_absolute_time(binary()) :: NaiveDateTime.t
   defp _make_absolute_time(from_string) do
+    if File.exists?(from_string) do
+      _make_absoulte_time_from_file(from_string)
+    else
+      _make_absoulte_time_from_string(from_string)
+    end
+  end
+
+  defp _make_absoulte_time_from_file(from_file) do
+    from_file
+    |> File.lstat!
+    |> naive_date_time_from_file_stat()
+  end
+
+  defp _make_absoulte_time_from_string(from_string) do
     time_spec = _compile_iso8601(from_string)
     case apply(&NaiveDateTime.new/6, time_spec) do
       {:ok, ndt} -> ndt

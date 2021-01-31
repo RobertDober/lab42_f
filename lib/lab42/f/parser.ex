@@ -1,5 +1,6 @@
 defmodule Lab42.F.Parser do
   use Lab42.F.Types
+  import Lab42.F.Time, only: [make_time: 1]
   @moduledoc """
   ```elixir
   defstruct wildcard: "*",
@@ -59,16 +60,16 @@ defmodule Lab42.F.Parser do
     _parse(rest, %{result | type: type})
   end
   defp _parse(["mgt", mgt | rest], result) do
-    _parse(rest, %{result | mgt: mgt})
+    _parse(rest, %{result | mgt: make_time(mgt)})
   end
   defp _parse(["mlt", mlt | rest], result) do
-    _parse(rest, %{result | mlt: mlt})
+    _parse(rest, %{result | mlt: make_time(mlt)})
   end
   defp _parse(["sgt", sgt | rest], result) do
-    _parse(rest, %{result | sgt: sgt})
+    _parse(rest, %{result | sgt: make_time(sgt)})
   end
   defp _parse(["slt", slt | rest], result) do
-    _parse(rest, %{result | slt: slt})
+    _parse(rest, %{result | slt: make_time(slt)})
   end
   defp _parse(["rgx", rgx | rest], result) do
     _parse(rest, %{result | rgx: rgx})
@@ -76,4 +77,5 @@ defmodule Lab42.F.Parser do
   defp _parse(rest, result) do
     %{result | transform: Enum.join(rest, " ")} |> _check_values!()
   end
+
 end

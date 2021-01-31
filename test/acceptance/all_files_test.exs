@@ -31,7 +31,7 @@ defmodule Test.Acceptance.AllFilesTest do
   describe "files newer than pic1.jpg" do
     test "all of them without extension" do
       result = run(~W[ w test/fixtures/* mlt test/fixtures/pic1.jpg echo%s'%B' ])
-      expected = [ "echo 'pic1'", "echo 'pic3'", "echo 'doc1'", "echo 'doc2'", "echo 'doc3'", "echo 'doc4'", "echo 'doc5'", "echo 'video2'", "echo 'pic2'" ]
+      expected = [ "echo 'video1'", "echo 'video3'", "echo 'video4'", "echo 'video5'", "echo 'pic1'" ]
       assert result == expected
     end
   end
