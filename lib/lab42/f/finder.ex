@@ -16,7 +16,6 @@ defmodule Lab42.F.Finder do
   filtered
     |> filter_rgx(parsed.rgx, 0)
     |> Enum.sort_by(&(&1.mtime))
-    |> Enum.map(&(&1.name))
   end
 
   defp filter(file_info, parsed) do

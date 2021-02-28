@@ -1,180 +1,39 @@
 defmodule Lab42.F.Transformer do
   use Lab42.F.Types
 
-  import Lab42.F.File
+  alias Lab42.F.{File, Transformations}
 
   @moduledoc false
-
-  @sys_interface Application.fetch_env!(:lab42_f, :sys_interface)
 
   @doc false
   @spec transform(Lab42.F.Finder.t()) :: binaries()
   def transform(file_list_transform)
 
   def transform({file_list, transform}) do
-    apply_transform(file_list, compile_transform(transform))
+    compiled = Transformations.compile(transform)
+    transform_file_list(file_list, compiled)
   end
 
-  defp apply_transform(file_list, compiled_transform) do
-    file_list
-    |> Enum.map(&apply_transform_to_file(&1, compiled_transform))
+  defp transform_file_list(file_list, compiled, result \\ [])
+
+  defp transform_file_list([], _compiled, result) do
+    Enum.reverse(result)
   end
 
-  defp apply_transform_to_file(file, compiled_transform) do
-    compiled_transform
-    |> Enum.map(&apply_transform_to_chunk(file, &1))
-    |> Enum.join()
+  defp transform_file_list([file | rest], compiled, result) do
+    result1 = apply_compiled(compiled, {[], file})
+    transform_file_list(rest, compiled, [result1 | result])
   end
 
-  defp apply_transform_to_chunk(file, chunk)
-  defp apply_transform_to_chunk(_file, chunk) when is_binary(chunk), do: chunk
-  defp apply_transform_to_chunk(file, {pattern, fun}), do: fun.(file, pattern)
-
-  @pattern_rgx ~r"""
-  (?: 
-    (?<!%) (?:
-      # prefix expressions must always follow their suffixed brethens, to allow them to match first
-      %% | %px | %pX | %p | %Px | %PX | %P | %bx | %bX | %b 
-         | %d | %D | %x | %X | %rx\d* | %s
-         | %e
-    )
-    | [^%]* )
-  """x
-  @transforms %{
-    "b" => &__MODULE__.basename/1,
-    "bx" => &__MODULE__.basename_wo_ext/1,
-    "bX" => &__MODULE__.basename_wo_any_ext/1,
-    "d" => &__MODULE__.rel_dirname/1,
-    "D" => &__MODULE__.abs_dirname/1,
-    "e" => &__MODULE__.empty/1,
-    "p" => &__MODULE__.full_relative_path/1,
-    "px" => &__MODULE__.full_relative_path_wo_ext/1,
-    "pX" => &__MODULE__.full_relative_path_wo_any_ext/1,
-    "P" => &__MODULE__.full_absolute_path/1,
-    "Px" => &__MODULE__.full_absolute_path_wo_ext/1,
-    "PX" => &__MODULE__.full_absolute_path_woany_ext/1,
-    "s" => &__MODULE__.verbatim_space/1,
-    "x" => &__MODULE__.last_extension/1,
-    "X" => &__MODULE__.all_extensions/1,
-    "%" => &__MODULE__.verbatim_percent/1
-  }
-
-  @last_ext_rgx ~r{ \. [^\.]* \z}x
-  @last_ext_pfx ~r{ .* \. }x
-
-  defp compile_transform(transform) do
-    with {result, _} <-
-           Regex.scan(@pattern_rgx, transform)
-           |> List.flatten()
-           |> Enum.map_reduce(File.new(""), &replace_patterns_with_functions/2),
-         do: result
+  defp apply_compiled(compiled, result_ctxt) 
+  defp apply_compiled([], {result, _}) do
+    result
+    |> Enum.reverse
+    |> Enum.join
   end
-
-  defp replace_patterns_with_functions(pattern, context)
-  defp replace_patterns_with_functions("%%", context), do: {"%%", context}
-
-  defp replace_patterns_with_functions("%" <> pattern, context) do
-    case Map.get(@transforms, pattern) do
-      nil -> _not_yet_implemented(pattern)
-      reducer -> reducer.(pattern, context)
+  defp apply_compiled([cfun|rest], {result, ctxt}) do
+    with {result1, ctxt1} <- cfun.(ctxt) do
+      apply_compiled(rest, {[result1 | result], ctxt1})
     end
-  end
-
-  defp replace_patterns_with_functions(pattern, context), do: {pattern, File.next_line(context)} 
-
-  defp _not_yet_implemented(pattern) do
-    raise Lab42.F.Error, ~s{the pattern "%#{pattern}" is not yet implemented}
-  end
-
-  def abs_dirname(file, _pattern) do
-    file.name
-    |> @sys_interface.expand
-    |> Path.dirname()
-  end
-
-  @extension_suffix ~r{ \A [^.]+ }x
-  def all_extensions(file, _pattenr) do
-    file.name
-    |> String.replace(@extension_suffix, "")
-  end
-
-  def basename(file, _pattern) do
-    Path.basename(file.name)
-  end
-
-  def basename_wo_ext(file, _pattern) do
-    file.name
-    |> Path.basename()
-    |> wo_last_extension()
-  end
-
-  def basename_wo_any_ext(file, _pattern) do
-    file.name
-    |> Path.basename()
-    |> wo_any_extension()
-  end
-
-  def empty(_file, _pattern) do
-    ""
-  end
-
-  def full_absolute_path(file, _pattern) do
-    @sys_interface.expand(file)
-  end
-
-  def full_absolute_path_woany_ext(file, _pattern) do
-    file
-    |> full_absolute_path(nil)
-    |> wo_any_extension()
-  end
-
-  def full_absolute_path_wo_ext(file, _pattern) do
-    file
-    |> full_absolute_path(nil)
-    |> wo_last_extension()
-  end
-
-  def full_relative_path(file, _pattern) do
-    file
-  end
-
-  def full_relative_path_wo_any_ext(file, _pattern) do
-    file
-    |> wo_any_extension()
-  end
-
-  def full_relative_path_wo_ext(file, _pattern) do
-    file
-    |> wo_last_extension()
-  end
-
-  def last_extension(file, _pattern) do
-    case String.split(file, ".") do
-      [_hd] -> ""
-      x -> "." <> (Enum.reverse(x) |> hd())
-    end
-  end
-
-  def rel_dirname(file, _pattern) do
-    file
-    |> Path.dirname()
-  end
-
-  def verbatim_percent(_file, _pattern) do
-    "%"
-  end
-
-  def verbatim_space(_file, _pattern) do
-    " "
-  end
-
-  defp wo_last_extension(file) do
-    file
-    |> String.replace(@last_ext_rgx, "")
-  end
-
-  defp wo_any_extension(file) do
-    String.split(file, ".")
-    |> List.first() || ""
   end
 end
