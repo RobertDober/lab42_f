@@ -2,8 +2,8 @@ defmodule Lab42F.MixProject do
   use Mix.Project
 
   @description "a sophisticated file name transformer"
+  @url "https://github.com/robertdober/lab42_f"
   @version "0.1.0"
-  # @url "https://github.com/robertdober/lab42_f"
 
   def project do
     [
@@ -15,7 +15,7 @@ defmodule Lab42F.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       escript: escript_config(),
       description: @description,
-      # package: package(),
+      package: package(),
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -23,6 +23,7 @@ defmodule Lab42F.MixProject do
         "coveralls.html": :test
       ],
       test_coverage: [tool: ExCoveralls],
+      aliases: [docs: &build_docs/1],
     ]
   end
 
@@ -48,4 +49,48 @@ defmodule Lab42F.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp package do
+    [
+      files: [
+        "lib",
+        "mix.exs",
+        "README.md"
+      ],
+      maintainers: [
+        "Robert Dober <robert.dober@gmail.com>",
+      ],
+      licenses: [
+        "Apache-2.0"
+      ],
+      links: %{
+        "GitHub" => @url
+      }
+    ]
+  end
+
+  @prerequisites """
+  run `mix escript.install hex ex_doc` and adjust `PATH` accordingly
+  """
+  @module "Lab42.F"
+
+  defp build_docs(_) do
+    Mix.Task.run("compile")
+    ex_doc = Path.join(Mix.path_for(:escripts), "ex_doc")
+    Mix.shell().info("Using escript: #{ex_doc} to build the docs")
+
+    unless File.exists?(ex_doc) do
+      raise "cannot build docs because escript for ex_doc is not installed, make sure to \n#{
+              @prerequisites
+            }"
+    end
+
+    args = [@module, @version, Mix.Project.compile_path()]
+    opts = ~w[--main #{@module} --source-ref v#{@version} --source-url #{@url}]
+
+    Mix.shell().info("Running: #{ex_doc} #{inspect(args ++ opts)}")
+    System.cmd(ex_doc, args ++ opts)
+    Mix.shell().info("Docs built successfully")
+  end
+
 end

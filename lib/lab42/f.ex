@@ -2,33 +2,40 @@ defmodule Lab42.F do
   use Lab42.F.Types
 
   usage_info = """
+
   f [filter_flags] [transformation]
 
   filter_flags:
-  w <wildecard>  defaults to *
-  t <prefefined type>
-  agt|alt|mgt|mlt <date time>
-  sgt|slt <file size>
-  rgx <rgx>
+    w <wildecard>  defaults to *
 
-  <date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
+    t &lt;prefefined type>
+
+    agt|alt|mgt|mlt <date time>
+
+    sgt|slt &lt;file size>
+
+    rgx &lt;rgx>
+
+  &lt;date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
   transformation:
   a string in which %<exp> will be replaced as follows and all spaces will
   be ignored  (like in ~r{...}x)
 
   for each processed file (use %%<exp> for a literal %<exp>)
 
-  <exp> depends on file:
+  &lt;<exp> depends on file:
 
-  %p full relative path
-  %P full expanded (absolute) path
-  %b file's base name with extension
-  %B file's base name w/o last extension (x.y.z → x.y)
-  %BX file's base name w/o all extensions (x.y.z → x)
-  %d file's relative dir name
-  %D file's expanded dir name
-  %x file's last extension (x.y.z → z)
-  %X file's extensions (x.y.z → y.z)
+      %p full relative path
+      %px full relative path w/o last extension
+      %pX full relative path w/o any extension
+      %P full expanded (absolute) path
+      %b file's base name with extension
+      %B file's base name w/o last extension (x.y.z → x.y)
+      %BX file's base name w/o all extensions (x.y.z → x)
+      %d file's relative dir name
+      %D file's expanded dir name
+      %x file's last extension (x.y.z → z)
+      %X file's extensions (x.y.z → y.z)
 
   <exp> is a random string:
 
@@ -39,9 +46,12 @@ defmodule Lab42.F do
   <exp> constant:
   %s space (\u0020)
   """
+
+
   @moduledoc """
   #{usage_info}
   """
+
   @spec main(binaries()) :: no_return() | :ok
   def main(argv)
   def main([]) do
@@ -68,10 +78,11 @@ defmodule Lab42.F do
   @doc false
   @spec run(binaries()) :: binaries()
   def run(argv) do
-    argv
+    parsed = argv
     |> Lab42.F.Parser.parse
+    files = parsed
     |> Lab42.F.Finder.find
-    |> Enum.map(&Lab42.F.Transformer.transform/1)
+    Lab42.F.Transformer.transform({files, parsed.transform})
   end
   @usage usage_info
   @spec _usage() :: no_return() 

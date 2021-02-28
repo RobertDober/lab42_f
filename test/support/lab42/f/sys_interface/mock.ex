@@ -21,6 +21,12 @@ defmodule Lab42.F.SysInterface.Mock do
     Agent.update(__MODULE__, &Map.put(&1, :now, ntime)) 
   end
 
+  @spec expand(binary()) :: binary()
+  @impl true
+  def expand(file) do
+    Path.join("/abspath", file)
+  end
+
   @spec now() :: NaiveDateTime.t
   @impl true
   def now do

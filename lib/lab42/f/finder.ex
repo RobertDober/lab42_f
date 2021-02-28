@@ -14,7 +14,7 @@ defmodule Lab42.F.Finder do
     |> Enum.reject(&FileInfo.dir?/1)
     |> Enum.filter(&filter(&1, parsed))
     |> Enum.sort_by(&(&1.stat.mtime))
-    |> Enum.map(&{&1.name, parsed.transform})
+    |> Enum.map(&(&1.name))
   end
 
   defp filter(file_info, parsed) do
