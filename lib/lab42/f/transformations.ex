@@ -4,14 +4,10 @@ defmodule Lab42.F.Transformations do
   @sys_interface Application.fetch_env!(:lab42_f, :sys_interface)
 
   @pattern_rgx ~r"""
-  (?: 
-    (?<!%) (?:
       # prefix expressions must always follow their suffixed brethens, to allow them to match first
       %% | %px | %pX | %p | %Px | %PX | %P | %bx | %bX | %b 
       | %d | %D | %x | %X | %rx\d* | %s
-        | %e
-    )
-        | [^%]* )
+        | %e | [^%]+
   """x
   @transforms %{
     "b" => &__MODULE__.basename/1,
