@@ -6,24 +6,20 @@ defmodule Lab42.F do
   f [filter_flags] [transformation]
 
   filter_flags:
-    w <wildecard>  defaults to *
 
-    t &lt;prefefined type>
+      w <wildecard>  defaults to *
+      t <prefefined type>
+      agt|alt|mgt|mlt <date time>
+          <date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
 
-    agt|alt|mgt|mlt <date time>
+      sgt|slt <file size>
+      x <rgx>
 
-    sgt|slt &lt;file size>
 
-    rgx &lt;rgx>
-
-  &lt;date time> is either an absolute or relative value, see moduledoc of `Lab42.F.Time`
-  transformation:
-  a string in which %<exp> will be replaced as follows and all spaces will
+  a string in which %&lt;exp> will be replaced as follows and all spaces will
   be ignored  (like in ~r{...}x)
 
-  for each processed file (use %%<exp> for a literal %<exp>)
-
-  &lt;<exp> depends on file:
+  transformation:
 
       %p full relative path
       %px full relative path w/o last extension
@@ -37,10 +33,12 @@ defmodule Lab42.F do
       %x file's last extension (x.y.z → z)
       %X file's extensions (x.y.z → y.z)
 
-  <exp> is a random string:
+      everything else is rendered verbatim
 
-  %r<random format>  a random string according to <random format> as follows
-  x<n>  n hex digits, e.g. %rx10 → a0df128872
+      <exp> is a random string:
+
+      %r<random format>  a random string according to <random format> as follows
+      x<n>  n hex digits, e.g. %rx10 → a0df128872
 
 
   <exp> constant:

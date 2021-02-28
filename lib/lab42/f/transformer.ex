@@ -1,6 +1,8 @@
 defmodule Lab42.F.Transformer do
   use Lab42.F.Types
 
+  import Lab42.F.File
+
   @moduledoc false
 
   @sys_interface Application.fetch_env!(:lab42_f, :sys_interface)
@@ -39,71 +41,76 @@ defmodule Lab42.F.Transformer do
     | [^%]* )
   """x
   @transforms %{
-    "b"  => &__MODULE__.basename/2,
-    "bx" => &__MODULE__.basename_wo_ext/2,
-    "bX" => &__MODULE__.basename_wo_any_ext/2,
-    "d"  => &__MODULE__.rel_dirname/2,
-    "D"  => &__MODULE__.abs_dirname/2,
-    "e"  => &__MODULE__.empty/2,
-    "p"  => &__MODULE__.full_relative_path/2,
-    "px" => &__MODULE__.full_relative_path_wo_ext/2,
-    "pX" => &__MODULE__.full_relative_path_wo_any_ext/2,
-    "P"  => &__MODULE__.full_absolute_path/2,
-    "Px" => &__MODULE__.full_absolute_path_wo_ext/2,
-    "PX" => &__MODULE__.full_absolute_path_woany_ext/2,
-    "s"  => &__MODULE__.verbatim_space/2,
-    "x"  => &__MODULE__.last_extension/2,
-    "X"  => &__MODULE__.all_extensions/2,
-    "%"  => &__MODULE__.verbatim_percent/2
+    "b" => &__MODULE__.basename/1,
+    "bx" => &__MODULE__.basename_wo_ext/1,
+    "bX" => &__MODULE__.basename_wo_any_ext/1,
+    "d" => &__MODULE__.rel_dirname/1,
+    "D" => &__MODULE__.abs_dirname/1,
+    "e" => &__MODULE__.empty/1,
+    "p" => &__MODULE__.full_relative_path/1,
+    "px" => &__MODULE__.full_relative_path_wo_ext/1,
+    "pX" => &__MODULE__.full_relative_path_wo_any_ext/1,
+    "P" => &__MODULE__.full_absolute_path/1,
+    "Px" => &__MODULE__.full_absolute_path_wo_ext/1,
+    "PX" => &__MODULE__.full_absolute_path_woany_ext/1,
+    "s" => &__MODULE__.verbatim_space/1,
+    "x" => &__MODULE__.last_extension/1,
+    "X" => &__MODULE__.all_extensions/1,
+    "%" => &__MODULE__.verbatim_percent/1
   }
 
   @last_ext_rgx ~r{ \. [^\.]* \z}x
   @last_ext_pfx ~r{ .* \. }x
 
   defp compile_transform(transform) do
-    Regex.scan(@pattern_rgx, transform)
-    |> List.flatten()
-    |> Enum.map(&replace_patterns_with_functions/1)
+    with {result, _} <-
+           Regex.scan(@pattern_rgx, transform)
+           |> List.flatten()
+           |> Enum.map_reduce(File.new(""), &replace_patterns_with_functions/2),
+         do: result
   end
 
-  defp replace_patterns_with_functions(pattern)
-  defp replace_patterns_with_functions("%%"), do: "%%"
+  defp replace_patterns_with_functions(pattern, context)
+  defp replace_patterns_with_functions("%%", context), do: {"%%", context}
 
-  defp replace_patterns_with_functions("%" <> pattern) do
-    {pattern, Map.get(@transforms, pattern, &_not_yet_implemented/2)}
+  defp replace_patterns_with_functions("%" <> pattern, context) do
+    case Map.get(@transforms, pattern) do
+      nil -> _not_yet_implemented(pattern)
+      reducer -> reducer.(pattern, context)
+    end
   end
 
-  defp replace_patterns_with_functions(pattern), do: pattern
+  defp replace_patterns_with_functions(pattern, context), do: {pattern, File.next_line(context)} 
 
-  defp _not_yet_implemented(_file, pattern) do
+  defp _not_yet_implemented(pattern) do
     raise Lab42.F.Error, ~s{the pattern "%#{pattern}" is not yet implemented}
   end
 
   def abs_dirname(file, _pattern) do
-    file
+    file.name
     |> @sys_interface.expand
-    |> Path.dirname
+    |> Path.dirname()
   end
 
-  @extension_suffix ~r{ \A [^.]+ }x 
+  @extension_suffix ~r{ \A [^.]+ }x
   def all_extensions(file, _pattenr) do
-    file
+    file.name
     |> String.replace(@extension_suffix, "")
   end
 
   def basename(file, _pattern) do
-    Path.basename(file)
+    Path.basename(file.name)
   end
 
   def basename_wo_ext(file, _pattern) do
-    file
-    |> Path.basename
+    file.name
+    |> Path.basename()
     |> wo_last_extension()
   end
 
   def basename_wo_any_ext(file, _pattern) do
-    file
-    |> Path.basename
+    file.name
+    |> Path.basename()
     |> wo_any_extension()
   end
 
@@ -144,13 +151,13 @@ defmodule Lab42.F.Transformer do
   def last_extension(file, _pattern) do
     case String.split(file, ".") do
       [_hd] -> ""
-       x  -> "." <> (Enum.reverse(x) |> hd())
+      x -> "." <> (Enum.reverse(x) |> hd())
     end
   end
 
   def rel_dirname(file, _pattern) do
     file
-    |> Path.dirname
+    |> Path.dirname()
   end
 
   def verbatim_percent(_file, _pattern) do
@@ -167,7 +174,7 @@ defmodule Lab42.F.Transformer do
   end
 
   defp wo_any_extension(file) do
-    ( String.split(file, ".")
-    |> List.first ) || ""
+    String.split(file, ".")
+    |> List.first() || ""
   end
 end

@@ -71,8 +71,8 @@ defmodule Lab42.F.Parser do
   defp _parse(["slt", slt | rest], result) do
     _parse(rest, %{result | slt: make_time(slt)})
   end
-  defp _parse(["rgx", rgx | rest], result) do
-    _parse(rest, %{result | rgx: rgx})
+  defp _parse(["x", rgx | rest], result) do
+    _parse(rest, %{result | rgx: Regex.compile!(rgx)})
   end
   defp _parse(rest, result) do
     %{result | transform: Enum.join(rest, " ")} |> _check_values!()

@@ -1,27 +1,27 @@
 defmodule Test.Transformer.BasenameTest do
   use ExUnit.Case
 
-  import Lab42.F.Transformer, only: [transform: 1]
+  import Test.Support.Trans, only: [trans: 1]
 
   describe "basename" do
     @files ~W[a/none b/base.ex c/readme.md.eex]
 
     test "with all extensions" do
-      result = transform({@files, "%b"})
+      result = trans({@files, "%b"})
       expected = ~W[none base.ex readme.md.eex]
 
       assert result == expected
     end
 
     test "w/o last extension" do
-      result = transform({@files, "%bx"})
+      result = trans({@files, "%bx"})
       expected = ~W[none base readme.md]
 
       assert result == expected
     end
 
     test "w/o any extension" do
-      result = transform({@files, "%bX"})
+      result = trans({@files, "%bX"})
       expected = ~W[none base readme]
 
       assert result == expected
@@ -31,7 +31,7 @@ defmodule Test.Transformer.BasenameTest do
   describe "dirnames" do
     @files ~W[a/b/c d/e f]
     test "relative dirname" do
-      result = transform({@files, "%d"})
+      result = trans({@files, "%d"})
       expected = ~W[a/b d .]
 
       assert result == expected
@@ -39,7 +39,7 @@ defmodule Test.Transformer.BasenameTest do
     end
 
     test "absolute dirname" do
-      result = transform({@files, "%D"})
+      result = trans({@files, "%D"})
       expected = ~W[/abspath/a/b /abspath/d /abspath]
 
       assert result == expected
@@ -50,14 +50,14 @@ defmodule Test.Transformer.BasenameTest do
     @files ~W[a b.c d.e.f]
 
     test "last extension" do
-      result = transform({@files, "%x"})
+      result = trans({@files, "%x"})
       expected = ["", ".c", ".f"] 
 
       assert result == expected
     end
 
     test "all extensions" do
-      result = transform({@files, "%X"})
+      result = trans({@files, "%X"})
       expected = ["", ".c", ".e.f"] 
 
       assert result == expected
