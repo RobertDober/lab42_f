@@ -6,7 +6,7 @@ defmodule Lab42.F.Transformations do
   @pattern_rgx ~r"""
       # prefix expressions must always follow their suffixed brethens, to allow them to match first
       %% | %px | %pX | %p | %Px | %PX | %P | %bx | %bX | %b 
-      | %d | %D | %x | %X | %rx\d* | %s
+      | %d | %D | %x | %X | %rx | %s
         | %e | [^%]+
   """x
   @transforms %{
@@ -28,10 +28,53 @@ defmodule Lab42.F.Transformations do
     "%" => "%"
   }
 
-  def compile(transform) do
-    Regex.scan(@pattern_rgx, transform)
-    |> List.flatten()
-    |> Enum.map(&replace_patterns_with_functions/1)
+  # @digits_rgx ~r/\A \d+ /x
+  def compile(transform, result \\ [])
+
+  def compile("", result) do
+    Enum.reverse(result)
+    # |> IO.inspect
+  end
+
+  def compile("%rx" <> rest, result) do
+    {digits, rest2} =
+      case Integer.parse(rest) do
+        :error -> {4, rest}
+        parsed -> parsed
+      end
+
+    random_gen = make_random_x_gen(digits)
+    compile(rest2, [random_gen | result])
+  end
+
+  def compile(<<char>> <> rest, result) do
+    compile(rest, [make_identity(char) | result])
+  end
+
+  # defp fetch(rgx, str) do
+  #   case Regex.run(str) do
+  #     nil -> {nil, str}
+  #     [match | _] -> {match, String.slice(str, String.length(match), String.length(str))}
+  #   end
+  # end
+
+  defp make_identity(value) do
+    fn ctxt ->
+      # IO.inspect(value, label: :identity)
+      {[value], ctxt}
+    end
+  end
+
+  defp make_random_x_gen(len) do
+    fn ctxt ->
+      {
+        @sys_interface.random_byte
+        |> Stream.iterate(fn _ -> @sys_interface.random_byte end)
+        |> Enum.take(len)
+        |> Enum.join,
+        ctxt
+      }
+    end
   end
 
   def abs_dirname(file) do

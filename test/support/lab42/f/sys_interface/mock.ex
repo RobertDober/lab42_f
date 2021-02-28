@@ -21,6 +21,15 @@ defmodule Lab42.F.SysInterface.Mock do
     Agent.update(__MODULE__, &Map.put(&1, :now, ntime)) 
   end
 
+  def mock_random_byte do
+    rb =
+      Enum.random(1..256)
+      |> Integer.to_string(16)
+      |> String.downcase()
+    Agent.update(__MODULE__, &Map.put(&1, :random_byte, rb)) 
+    rb
+  end
+
   @spec expand(binary()) :: binary()
   @impl true
   def expand(file) do
@@ -33,4 +42,9 @@ defmodule Lab42.F.SysInterface.Mock do
     Agent.get(__MODULE__, &Map.get(&1, :now))
   end
 
+  @spec random_byte() :: binary()
+  @impl true
+  def random_byte do
+    Agent.get(__MODULE__, &Map.get(&1, :random_byte))
+  end
 end

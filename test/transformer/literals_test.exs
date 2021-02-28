@@ -29,5 +29,11 @@ defmodule Test.Transformer.LiteralsTest do
 
       assert result == expected
     end
+    test "any and %e and %%e" do
+      result = trans({["a"], "hello%sWorld%%e"})
+      expected = ["hello World%e"]
+
+      assert result == expected
+    end
   end
 end
